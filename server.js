@@ -11,7 +11,7 @@ app.use(cors()); // Cho phép kết nối từ frontend
 
 // Kết nối đến file database
 // Bạn sẽ phải đặt file clinic.db ở cùng thư mục với server.js
-const db = new Database(path.join(__dirname, 'clinic.db'));
+const db = new Database(path.join(__dirname, 'clinic_backup_20250829_083142.db'));
 
 // API để lấy danh sách bệnh nhân
 app.get('/api/patients', (req, res) => {
