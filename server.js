@@ -1,18 +1,12 @@
-const express = require('express');
-const Database = require('better-sqlite3');
-const cors = require('cors');
-const path = require('path');
 const express = require("express");
-const sqlite3 = require("sqlite3").verbose();
+const Database = require("better-sqlite3");
 const cors = require("cors");
-
+const path = require("path");
 
 const app = express();
 
-
-app.use(express.json()); // Để xử lý dữ liệu JSON
-app.use(cors()); // Cho phép kết nối từ frontend
-
+app.use(express.json());
+app.use(cors());
 // Kết nối đến file database
 // Bạn sẽ phải đặt file clinic.db ở cùng thư mục với server.js
 const db = new Database(path.join(__dirname, 'clinic_backup_20250829_083142.db'));
