@@ -2,9 +2,13 @@ const express = require('express');
 const Database = require('better-sqlite3');
 const cors = require('cors');
 const path = require('path');
+const express = require("express");
+const sqlite3 = require("sqlite3").verbose();
+const cors = require("cors");
+
 
 const app = express();
-const PORT = 3000;
+
 
 app.use(express.json()); // Để xử lý dữ liệu JSON
 app.use(cors()); // Cho phép kết nối từ frontend
@@ -23,18 +27,48 @@ app.get('/api/patients', (req, res) => {
     }
 });
 
-// API để thêm bệnh nhân mới
-app.post('/api/patients', (req, res) => {
-    try {
-        const { FullName, Phone } = req.body;
-        const stmt = db.prepare('INSERT INTO Patients (FullName, Phone) VALUES (?, ?)');
-        const info = stmt.run(FullName, Phone);
-        res.json({ id: info.lastInsertRowid, message: 'Patient added successfully' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+// API thêm bệnh nhân mới
+app.post("/api/patients", (req, res) => {
+  const { FullName, DateOfBirth, Gender, Allergies, Address, Phone } = req.body;
+
+  if (!FullName || !DateOfBirth || !Gender || !Allergies || !Address || !Phone) {
+    return res.status(400).json({ error: "Thiếu dữ liệu bắt buộc" });
+  }
+
+  const sql = `
+    INSERT INTO Patients (FullName, DateOfBirth, Gender, Allergies, Address, Phone)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `;
+  db.run(sql, [FullName, DateOfBirth, Gender, Allergies, Address, Phone], function (err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
     }
+    res.json({
+      PatientId: this.lastID,
+      FullName,
+      DateOfBirth,
+      Gender,
+      Allergies,
+      Address,
+      Phone
+    });
+  });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+// API xóa bệnh nhân
+app.delete("/api/patients/:id", (req, res) => {
+  const id = req.params.id;
+  const sql = "DELETE FROM Patients WHERE PatientId = ?";
+  db.run(sql, [id], function (err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (this.changes === 0) {
+      return res.status(404).json({ error: "Không tìm thấy bệnh nhân" });
+    }
+    res.json({ message: "Xóa thành công", deletedId: id });
+  });
 });
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
